@@ -139,6 +139,21 @@ def board_the_plane(boardingQueue):
             #Set first place in isle to the first passenger in the seat data seating_plan[3] then remove it from seat data
             seating_plan[3][0] = boardingQueue[0]  
             boardingQueue.pop(0)
+            
+        
+        visualizer = []
+        for i,column in enumerate(seating_plan):
+            visualizer.append([])
+            for seat in column:
+                if i!=3:
+                    if seat != -1:
+                        visualizer[i].append(0)
+                    else: visualizer[i].append(-1)
+                else:
+                    if seat != '':
+                        visualizer[i].append(0)
+                    else: visualizer[i].append(-1)                    
+        
      
         
     return total_time
