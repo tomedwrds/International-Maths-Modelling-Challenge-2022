@@ -21,6 +21,8 @@ SINGLE_PRINGLE_COEFFICIENT = 70
 COUPLES_COEFFIENCT = 20
 THREESOME_COEFFICIENT = 10
 
+
+# render stuff that I don't understand
 def intalize_render():
     
 
@@ -69,8 +71,6 @@ def intalize_render():
     ax.set_xlim(left=-0.5)
     
     return im,fig
-
-# Comment out if not using
 def update_render(seat_plan):
     
     visualizer = []
@@ -269,13 +269,13 @@ def create_boarding_order_for_section(boarding_section, other_section1,other_sec
 
 
 # create order of boarding for section when using groups
-def create_boarding_order_for_section(boarding_section, other_section1, other_section2, start_row, end_row):
+def create_boarding_order_for_section_but_with_groups(boarding_section, other_section1, other_section2, start_row, end_row):
 
     for row in range(start_row,end_row+1):
         for seat in range(-3,4):
 
             if seat != 0:
-                if naughty_boy():
+                if not naughty_boy():
                     boarding_section.append([row,seat,assign_luggage(),0]) 
                     
                     
