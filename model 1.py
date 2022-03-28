@@ -1,9 +1,69 @@
 
 import random
 
+
+#Comment out if not using
+import matplotlib.pyplot as plt
+import numpy
+
 #General setup shit put all seats in
 NUM_ROWS = 33
 NUM_SEATS = 6
+
+def intalize_render():
+    
+
+    #Absolute mess of code
+    image = []
+    for i in range(NUM_SEATS+1):
+        subimage = []
+        for k in range(NUM_ROWS):
+            if k % 2 == 0:
+                subimage.append(-1) 
+            else:
+                subimage.append(0)
+            
+        image.append(subimage)
+            
+
+    fig,ax = plt.subplots(1,1)
+    plt.set_cmap('OrRd')
+    print(image)
+    image = numpy.array(image)
+
+    im = ax.imshow(image)
+    #number_of_runs = range(1,NUM_ROWS)    # use your actual number_of_runs
+    #ax.set_xticks(number_of_runs, minor=False)
+    #ax.xaxis.grid(True, which='major')
+
+
+    ax.set_yticks(numpy.arange(0.5, NUM_SEATS+1.5, 1).tolist(), minor=False)
+    ax.yaxis.grid(True, which='major')
+    ax.set_yticklabels(['Row A','Row B','Row C','Aisle','Row D','Row E','Row F'])
+    ax.set_ylim(top=-0.5)
+
+
+    ax.set_xticks(numpy.arange(0.5, NUM_ROWS+.5, 1).tolist(), minor=False)
+    ax.xaxis.grid(True, which='major')
+
+    xticklist = []
+    #Create list of numbers between 
+    for i in range(NUM_ROWS):
+        if ((i+1) % 5 == 0) and (i != 0):
+            xticklist.append(str(i+1))
+        else:
+            xticklist.append('')
+        
+    ax.set_xticklabels(xticklist)
+    ax.set_xlim(left=-0.5)
+    
+    return im,fig
+
+#Comment out if not using
+im,fig = intalize_render()
+
+
+
 
 
 # all measured in standard units (m,s,m/s etc)
@@ -171,6 +231,9 @@ def board_the_plane(boardingQueue):
             seating_plan[3][0] = boardingQueue[0]  
             boardingQueue.pop(0)
             
+        #Update render comment out if not using
+        update_render(seating_plan)                   
+        
         
 
         
@@ -357,7 +420,27 @@ def seat_boarding():
     print('By seat: ', sum(test_cases)/len(test_cases))    
             
     
-
+def update_render(seat_plan):
+    
+    visualizer = []
+    for i,column in enumerate(seat_plan):
+        visualizer.append([])
+        for seat in column:
+            if i!=3:
+                if seat != -1:
+                    visualizer[i].append(0)
+                else: visualizer[i].append(-1)
+            else:
+                if seat != '':
+                    visualizer[i].append(0)
+                else: visualizer[i].append(-1)
+                    
+                    
+        
+    im.set_data(visualizer)
+    fig.canvas.draw_idle()
+    plt.pause(0.001) 
+ 
 
 
 random_boarding()
