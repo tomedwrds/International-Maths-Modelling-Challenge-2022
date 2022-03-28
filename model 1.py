@@ -243,7 +243,7 @@ def assign_luggage():
     return random.randrange(100) < BAG_COEFFICIENT*100
 
 # naughty boy
-def naughty_boy():
+def is_not_a_naughty_boy():
     return random.randrange(100) > NAUGHTY_BOY_COEFFICIENT*100
 # create a group size
 def group_size(group_weights):
@@ -258,7 +258,7 @@ def create_boarding_order_for_section(boarding_section, other_section1,other_sec
         for seat in range(-3,4):
 
             if seat != 0:
-                if naughty_boy():
+                if is_not_a_naughty_boy():
                     boarding_section.append([row,seat,assign_luggage(),0]) 
                 # else they try board during different sections
                 else:
@@ -270,45 +270,66 @@ def create_boarding_order_for_section(boarding_section, other_section1,other_sec
 
 # create order of boarding for section when using groups
 def create_boarding_order_for_section_but_with_groups(boarding_section, other_section1, other_section2, start_row, end_row):
-
+    current_group_member = 0
+    current_group_section = 1
+    current_group_size = 1
+    boarding_section.append([])
+    
     for row in range(start_row,end_row+1):
         for seat in range(-3,4):
 
             if seat != 0:
-                if not naughty_boy():
-                    boarding_section.append([row,seat,assign_luggage(),0]) 
+                
+                current_group_member += 1
+                
+                if current_group_section == 1:
+                    boarding_section[-1].append([row,seat,assign_luggage(),0])
+                elif current_group_section == 2:
+                    other_section1[-1].append([row,seat,assign_luggage(),0])
+                elif current_group_section == 3:
+                    other_section2[-1].append([row,seat,assign_luggage(),0])
+                
+                if current_group_member == current_group_size: 
                     
-                    
-                    current_group_member += 1
+                    if  seat in [2,3]:
+                        if current_group_section == 1:
+                            boarding_section[-1].reverse()
+                        elif current_group_section == 2:
+                            other_section1[-1].reverse()
+                        elif current_group_section == 3:
+                            other_section2[-1].reverse()                   
                         
-                    if current_group_member == current_group_size: 
-                    
-                        if  seat in [2,3]:
-                            boardingQueue[-1].reverse()
-                            
-                        if seat in [-3,-2,1]:
-                            current_group_size = group_size((SINGLE_PRINGLE_COEFFICIENT,COUPLES_COEFFIENCT,THREESOME_COEFFICIENT))
-                        elif seat in [-1,2]:
-                            current_group_size = group_size((SINGLE_PRINGLE_COEFFICIENT,COUPLES_COEFFIENCT,0))
-                        elif seat == 3:
-                            current_group_size = 1
-                            
-                        current_group_member = 0
-                        boardingQueue.append([])                    
-                                        
+                    if seat in [-3,-2,1]:
+                        current_group_size = group_size((SINGLE_PRINGLE_COEFFICIENT,COUPLES_COEFFIENCT,THREESOME_COEFFICIENT))
+                    elif seat in [-1,2]:
+                        current_group_size = group_size((SINGLE_PRINGLE_COEFFICIENT,COUPLES_COEFFIENCT,0))
+                    elif seat == 3:
+                        current_group_size = 1
+                        
+                    current_group_member = 0   
                     
                     
-                # else they try board during different sections
-                else:
-                    if random.randrange(100) < 50:
-                        other_section1.append([row,seat,assign_luggage(),0])  
+                    if is_not_a_naughty_boy():
+                
+                        current_group_section = 1
+                        boarding_section.append([])              
+                
+                
+                    # else they try board during different sections
                     else:
-                        other_section2.append([row,seat,assign_luggage(),0]) 
-                        
-                        
-                        
+                        if random.randrange(100) < 50:
+                            current_group_section = 2
+                            other_section1.append([])  
+                        else:
+                            current_group_section = 3
+                            other_section2.append([])                     
+                
 
+                    
 
+# return average of list
+def average(x):
+    return sum(x)/len(x)
 # boarding in random order
 def random_boarding():
     
@@ -327,10 +348,10 @@ def random_boarding():
         
     print('Random: ', sum(test_cases)/len(test_cases))
     
-# boarding in sections
+# boarding in sections, including all permutations
 def section_boarding():
     
-    test_cases = []
+    amf, afm, maf, mfa, fma, fam = [],[],[],[],[],[]
     for _ in range(N_TEST_CASES):
         
         aft,middle,front = [],[],[]
@@ -347,10 +368,19 @@ def section_boarding():
         random.shuffle(middle)
         random.shuffle(front)
         
-        test_cases.append(board_the_plane(aft+middle+front))
+        amf.append(board_the_plane(aft+middle+front))
+        afm.append(board_the_plane(aft+front+middle))
+        maf.append(board_the_plane(middle+aft+front))
+        mfa.append(board_the_plane(middle+front+aft))
+        fma.append(board_the_plane(front+middle+aft))
+        fam.append(board_the_plane(front+aft+middle))
         
-    print('Sectional: ', sum(test_cases)/len(test_cases))        
-        
+    print('Sectional amf: ', average(amf))
+    print('Sectional afm: ', average(afm))
+    print('Sectional maf: ', average(maf))  
+    print('Sectional mfa: ', average(mfa))
+    print('Sectional fma: ', average(fma))
+    print('Sectional fam: ', average(fam))
         
 # boarding by seat
 def seat_boarding():
@@ -364,7 +394,7 @@ def seat_boarding():
         for row in range(1,NUM_ROWS+1):
             
             # if passenger is not useless
-            if naughty_boy():
+            if is_not_a_naughty_boy():
                 section1.append([row,-3,assign_luggage(),0]) 
             # else they try board during different sections
             else:
@@ -374,7 +404,7 @@ def seat_boarding():
                     section3.append([row,-3,assign_luggage(),0])  
             
             # if passenger is not useless
-            if naughty_boy():
+            if is_not_a_naughty_boy():
                 section1.append([row,3,assign_luggage(),0]) 
             # else they try board during different sections
             else:
@@ -388,7 +418,7 @@ def seat_boarding():
             
             
             # if passenger is not useless
-            if naughty_boy():
+            if is_not_a_naughty_boy():
                 section2.append([row,-2,assign_luggage(),0]) 
             # else they try board during different sections
             else:
@@ -397,7 +427,7 @@ def seat_boarding():
                 else:
                     section3.append([row,-2,assign_luggage(),0])  
 
-            if naughty_boy:
+            if is_not_a_naughty_boy:
                 section2.append([row,2,assign_luggage(),0]) 
             else:
                 if random.randrange(100) < 50:
@@ -409,7 +439,7 @@ def seat_boarding():
         for row in range(1,NUM_ROWS+1):
             
             # if passenger is not useless
-            if naughty_boy():
+            if is_not_a_naughty_boy():
                 section3.append([row,-1,assign_luggage(),0]) 
             # else they try board during different sections
             else:
@@ -420,7 +450,7 @@ def seat_boarding():
                     
                     
             # if passenger is not useless
-            if naughty_boy:
+            if is_not_a_naughty_boy:
                 section3.append([row,1,assign_luggage(),0]) 
             # else they try board during different sections
             else:
@@ -486,7 +516,7 @@ def random_boarding_with_groups():
         
         boardingQueue = [j for sub in boardingQueue for j in sub]
         
-        print(boardingQueue)
+        #print(boardingQueue)
         
         test_cases.append(board_the_plane(boardingQueue))
         
@@ -502,24 +532,42 @@ def section_boarding_with_groups():
         aft,middle,front = [],[],[]
         
         # aft section
-        create_boarding_order_for_section(aft,middle,front,23,33)                
+        create_boarding_order_for_section_but_with_groups(aft,middle,front,23,33)                
         # middle section
-        create_boarding_order_for_section(middle,aft,front,12,22)   
+        create_boarding_order_for_section_but_with_groups(middle,aft,front,12,22)   
         # front section
-        create_boarding_order_for_section(front,middle,aft,1,11)        
+        create_boarding_order_for_section_but_with_groups(front,middle,aft,1,11)        
                
         
         random.shuffle(aft)
         random.shuffle(middle)
         random.shuffle(front)
         
-        test_cases.append(board_the_plane(aft+middle+front))
+        boardingQueue = aft+middle+front
+        boardingQueue = [j for sub in boardingQueue for j in sub]
+        
+        #print(boardingQueue)
+        
+        test_cases.append(board_the_plane(boardingQueue))
                
 
-    print('Sectional: ', sum(test_cases)/len(test_cases))        
+    print('Sectional with groups: ', sum(test_cases)/len(test_cases))        
+
+
+
+
+
+
 
 #im,fig = intalize_render()
-random_boarding_with_groups()
+
+
+
+
+
+
 random_boarding()
 section_boarding()
 seat_boarding()
+random_boarding_with_groups()
+section_boarding_with_groups()
