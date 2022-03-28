@@ -6,8 +6,8 @@ NUM_ROWS = 33
 NUM_SEATS = 6
 
 
-# all measured in standard units (meters, seconds, etc)
-AVERAGE_WALKING_SPEED = 1.3
+# all measured in standard units (m,s,m/s etc)
+AVERAGE_WALKING_SPEED = 0.8
 AVERAGE_SEAT_PITCH = 0.78
 TIME_TO_MOVE = AVERAGE_SEAT_PITCH / AVERAGE_WALKING_SPEED
 TIME_TO_STOW = 5
@@ -19,11 +19,86 @@ NAUGHTY_BOY_COEFFICIENT = 0.05
 N_TEST_CASES = 10
 
 
+# calculate time taken to get to seat if someone in the way
+def get_past_people(seating_plan, passenger, current_row):
+    
+    # number of people blocking seats
+    N=0
+    time_to_stop_blocking_aisle = 0
+
+
+    # aisle seat
+    if abs(passenger[1]) == 1:
+        time_to_stop_blocking_aisle += TIME_TO_SIT_OR_STAND
+    # middle or window seat: people are in the way
+    else:
+        # window seat A
+        if passenger[1] == -3:
+            # if aisle seat taken IMPORTANT to check aisle seat first so f is maximised
+            if seating_plan[2][NUM_ROWS-current_row-1] != -1:
+                N+=1
+                f=1
+            # if middle seat taken
+            if seating_plan[1][NUM_ROWS-current_row-1] != -1:
+                N+=1
+                f=2
+
+        # middle seat B
+        elif passenger[1] == -2:
+            # if aisle seat taken
+            if seating_plan[2][NUM_ROWS-current_row-1] != -1:
+                N+=1
+                f=1        
+
+        # window seat F
+        elif passenger[1] == 3:
+            # if aisle seat taken IMPORTANT to check aisle seat first so f is maximised
+            if seating_plan[4][NUM_ROWS-current_row-1] != -1:
+                N+=1
+                f=1
+            # if middle seat taken
+            if seating_plan[5][NUM_ROWS-current_row-1] != -1:
+                N+=1
+                f=2
+
+        # middle seat B
+        elif passenger[1] == 2:
+            # if aisle seat taken
+            if seating_plan[4][NUM_ROWS-current_row-1] != -1:
+                N+=1
+                f=1      
+
+
+        if N==0:
+            time_to_stop_blocking_aisle = TIME_TO_MOVE_PAST_SEAT
+        else:
+            time_to_stop_blocking_aisle += TIME_TO_SIT_OR_STAND + TIME_TO_MOVE_PAST_SEAT*(N+f+1)  
+            
+    return time_to_stop_blocking_aisle, N
+
+
+
+# visualize 
+def visualizer(seating_plan):
+    
+    visualizer = []
+    for i,column in enumerate(seating_plan):
+        visualizer.append([])
+        for seat in column:
+            if i!=3:
+                if seat != -1:
+                    visualizer[i].append(0)
+                else: visualizer[i].append(-1)
+            else:
+                if seat != '':
+                    visualizer[i].append(0)
+                else: visualizer[i].append(-1)                    
+        
 
 # board the plane
 def board_the_plane(boardingQueue):
     
-
+    # initialize seating plan
     seating_plan = [[-1 for _ in range(NUM_ROWS)] for _ in range(NUM_SEATS + 1)]
     seating_plan[3]=['' for _ in range(NUM_ROWS)]
     seated = []
@@ -46,65 +121,18 @@ def board_the_plane(boardingQueue):
                 # check if passenger in right row and thus they can seat
                 if passenger[0] == NUM_ROWS - current_row:
                     
-                    time_to_stop_blocking_aisle = 0
-                    
                     # if passenger has baggage
                     if passenger[2] == True:
                         time_to_stow = TIME_TO_STOW
                     else: time_to_stow = 0
                     
-                    # number of people blocking seats
-                    N=0
+                    # time it takes to stop blocking aisle and number of people in the way
+                    try:
+                        time_to_stop_blocking_aisle[5]
+                    except:
+                        time_to_stop_blocking_aisle, N = get_past_people(seating_plan, passenger, current_row)   
+                        seating_plan[3][NUM_ROWS-current_row-1].append(time_to_stop_blocking_aisle)
                     
-                    # aisle seat
-                    if abs(passenger[1]) == 1:
-                        time_to_stop_blocking_aisle += TIME_TO_SIT_OR_STAND
-                    # middle or window seat: people are in the way
-                    else:
-                        # window seat A
-                        if passenger[1] == -3:
-                            # if aisle seat taken IMPORTANT to check aisle seat first so f is maximised
-                            if seating_plan[2][NUM_ROWS-current_row-1] != -1:
-                                N+=1
-                                f=1
-                            # if middle seat taken
-                            if seating_plan[1][NUM_ROWS-current_row-1] != -1:
-                                N+=1
-                                f=2
-                      
-                        # middle seat B
-                        elif passenger[1] == -2:
-                            # if aisle seat taken
-                            if seating_plan[2][NUM_ROWS-current_row-1] != -1:
-                                N+=1
-                                f=1        
-                                
-                        # window seat F
-                        elif passenger[1] == 3:
-                            # if aisle seat taken IMPORTANT to check aisle seat first so f is maximised
-                            if seating_plan[4][NUM_ROWS-current_row-1] != -1:
-                                N+=1
-                                f=1
-                            # if middle seat taken
-                            if seating_plan[5][NUM_ROWS-current_row-1] != -1:
-                                N+=1
-                                f=2
-                                
-                        # middle seat B
-                        elif passenger[1] == 2:
-                            # if aisle seat taken
-                            if seating_plan[4][NUM_ROWS-current_row-1] != -1:
-                                N+=1
-                                f=1      
-                        
-                                
-                        if N==0:
-                            time_to_stop_blocking_aisle = TIME_TO_MOVE_PAST_SEAT
-                        else:
-                            time_to_stop_blocking_aisle += TIME_TO_SIT_OR_STAND + TIME_TO_MOVE_PAST_SEAT*(N+f+1)
-                            
-                            
-    
                     
                     # make sure there is an empty space       
                     if N==2 and current_row != 0 and seating_plan[3][NUM_ROWS-current_row] != '' and current_row != 0:
@@ -144,20 +172,7 @@ def board_the_plane(boardingQueue):
             boardingQueue.pop(0)
             
         
-        visualizer = []
-        for i,column in enumerate(seating_plan):
-            visualizer.append([])
-            for seat in column:
-                if i!=3:
-                    if seat != -1:
-                        visualizer[i].append(0)
-                    else: visualizer[i].append(-1)
-                else:
-                    if seat != '':
-                        visualizer[i].append(0)
-                    else: visualizer[i].append(-1)                    
-        
-     
+
         
     return total_time
 
