@@ -412,6 +412,8 @@ def create_boarding_order_for_aisle_but_with_groups(boarding_section, other_sect
                 other_section1.append([row, column, assign_luggage(), 0])  
             else:
                 other_section2.append([row, column, assign_luggage(), 0])
+                
+    
     
 
 # return average of list
@@ -582,10 +584,31 @@ def section_boarding_with_groups():
         
         #print(boardingQueue)
         
-        test_cases.append(board_the_plane(boardingQueue))
-               
-
-    print('Sectional with groups: ', sum(test_cases)/len(test_cases))        
+        boardingQueue = aft+middle+front
+        boardingQueue = [j for sub in boardingQueue for j in sub]        
+        amf.append(board_the_plane(boardingQueue))
+        boardingQueue = aft+front+middle
+        boardingQueue = [j for sub in boardingQueue for j in sub]        
+        afm.append(board_the_plane(boardingQueue))
+        boardingQueue = middle+aft+front
+        boardingQueue = [j for sub in boardingQueue for j in sub]        
+        maf.append(board_the_plane(boardingQueue))
+        boardingQueue = middle+front+aft
+        boardingQueue = [j for sub in boardingQueue for j in sub]        
+        mfa.append(board_the_plane(boardingQueue))
+        boardingQueue = front+middle+aft
+        boardingQueue = [j for sub in boardingQueue for j in sub]        
+        fma.append(board_the_plane(boardingQueue))
+        boardingQueue = front+aft+middle
+        boardingQueue = [j for sub in boardingQueue for j in sub]        
+        fam.append(board_the_plane(boardingQueue))
+        
+    print('Sectional amf: ', average(amf))
+    print('Sectional afm: ', average(afm))
+    print('Sectional maf: ', average(maf))  
+    print('Sectional mfa: ', average(mfa))
+    print('Sectional fma: ', average(fma))
+    print('Sectional fam: ', average(fam))       
 
 
 
@@ -854,8 +877,8 @@ def steffen_bofa_method():
 
 #random_boarding()
 #section_boarding()
-seat_boarding()
-random_boarding_with_groups()
+#seat_boarding()
+#random_boarding_with_groups()
 section_boarding_with_groups()
 prioritize_groups_boarding()
 steffen_deeznuts()
