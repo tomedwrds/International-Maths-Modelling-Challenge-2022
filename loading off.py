@@ -86,7 +86,7 @@ seated = []
 
 
 TIME_STEP = 0.1
-move_time = 0.4
+move_time = 0.1
 total_time=0
 
 #print(seating_plan)
@@ -123,24 +123,71 @@ def move_left():
                 seating_plan[aisles][seat] = [-1,0]
                 
                 
+first_run = True
 
 while True:
     
+    priority = []
+    if first_run:
+        for row in ((range(NUM_ROWS))):
+            right = random.randint(0, 1) 
+            if (right):
+                priority.append('Right')
+            else:
+                priority.append('Left')
+    else:
+        for row in ((range(NUM_ROWS))):
+            left = 0
+            right = 0
+            for aisles in (range(NUM_SEATS+1)):
+                if seating_plan[aisles][row][0] == 0:
+                    if aisles <= 2:
+                        left += 1
+                    elif aisles >= 4:
+                        right += 1
+                
+            #if more people on the right give them priorit
+            if right > left:
+                priority.append('Right')
+            else:
+                priority.append('Left')
+        
+            
+            
+            
     #Exit square
     
-    for aisles in (reversed(range(len(seating_plan)))):
-        print(aisles)
+    for aisles in ((range(len(seating_plan)))):
+        
         for seat in (range(len(seating_plan[aisles]))):
+            
+            
+            
             if seating_plan[aisles][seat][1] >= 0.4 and seating_plan[aisles][seat][0] == 0:
-                #Move the p
-                move_up()
+                
                 
                 #Move all blocks left
                 move_left()
                 
-            #Remove player if in sqare
-            if (aisles == 3) and (seat == 0):
-                seating_plan[aisles][seat] = [-1,0]
+                #Remove player if in sqare
+                if (aisles == 3) and (seat == 0):
+                    seating_plan[aisles][seat] = [-1,0]
+                
+                
+                if aisles != 3:
+                    if (priority[seat] == 'Right' or (aisles > 4)) and aisles > 3:
+                        #Move the p
+                        move_up()
+                    if (priority[seat] == 'Left' or (aisles < 2)) and aisles < 3:
+                        move_down()
+                
+                
+                
+                
+    
+                
+                
+            
                 
             #Incrasese internal clock
             seating_plan[aisles][seat][1] += 0.1
