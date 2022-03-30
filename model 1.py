@@ -402,17 +402,60 @@ def create_boarding_order_for_aisle_but_with_groups(boarding_section, other_sect
     
     # window seats
     for row in range(1,NUM_ROWS+1):
-
-        # if passenger is not useless
-        if is_not_a_naughty_boy():
-            boarding_section.append([row, column, assign_luggage(), 0]) 
-        # else they try board during different sections
-        else:
-            if random.randrange(100) < 50:
-                other_section1.append([row, column, assign_luggage(), 0])  
+        
+        # check if item in group already appended
+        if (not any([row,column] in x for x in boarding_section) 
+            and not any([row,column] in x for x in other_section1)
+            and not any([row,column] in x for x in other_section2)):  
+            
+            # if passenger is not useless
+            if is_not_a_naughty_boy():
+        
+        
+                if column==-3:
+                    current_group_size = group_size((70,50,20))
+        
+                    if current_group_size == 3:
+                        boarding_section.append([[row, -3],[row, -2],[row, -1]])
+                    elif current_group_size == 2:    
+                        boarding_section.append([[row, -3],[row, -2]])
+                    else:    
+                        boarding_section.append([[row, -3]])
+        
+                elif column==3:
+                    current_group_size = group_size((70,50,20))
+        
+                    if current_group_size == 3:
+                        boarding_section.append([[row, 3],[row, 2],[row, 1]])
+                    elif current_group_size == 2:    
+                        boarding_section.append([[row, 3],[row, 2]])
+                    else:    
+                        boarding_section.append([[row, 3]])            
+         
+                elif column==-2:
+                    current_group_size = group_size((80,40,0))
+                    if current_group_size == 2:    
+                        boarding_section.append([[row, -2],[row, -1]])
+                    else:    
+                        boarding_section.append([[row, -2]])   
+                elif column==2:
+                    current_group_size = group_size((80,40,0))
+                    if current_group_size == 2:    
+                        boarding_section.append([[row, 2],[row, 1]])
+                    else:    
+                        boarding_section.append([[row, 2]])               
+        
+        
+                else: boarding_section.append([[row, column]]) 
+        
+        
+        
+            # else they try board during different sections    
             else:
-                other_section2.append([row, column, assign_luggage(), 0])
-                
+                if random.randrange(100) < 50:
+                    other_section1.append([[row, column]])  
+                else:
+                    other_section2.append([[row, column]])                
     
     
 
