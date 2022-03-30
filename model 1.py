@@ -875,7 +875,7 @@ def steffen_bofa_method():
 
 
 
-#random_boarding()
+random_boarding()
 #section_boarding()
 #seat_boarding()
 #random_boarding_with_groups()
