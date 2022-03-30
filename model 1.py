@@ -10,12 +10,13 @@ NUM_SEATS = 6
 AVERAGE_WALKING_SPEED = 0.8
 AVERAGE_SEAT_PITCH = 0.78
 TIME_TO_MOVE = AVERAGE_SEAT_PITCH / AVERAGE_WALKING_SPEED
-FAMILY_TIME_TO_MOVE = 1.3 * TIME_TO_MOVE
-NON_FAMILY_TIME_TO_MOVE = TIME_TO_MOVE
+FAMILY_TIME_TO_MOVE = 1.2 * TIME_TO_MOVE
+NON_FAMILY_TIME_TO_MOVE = 0.8 * TIME_TO_MOVE
+TIME_TO_STOW = 5
 TIME_TO_SIT_OR_STAND = 2.5
 TIME_TO_MOVE_PAST_SEAT = 2
-BAG_COEFFICIENT = (20,80,10)
-NAUGHTY_BOY_COEFFICIENT = 0.1
+BAG_COEFFICIENT = 0.85
+NAUGHTY_BOY_COEFFICIENT = 0.05
 N_TEST_CASES = 10
 # proportions of group sizes
 SINGLE_PRINGLE_COEFFICIENT = 70
@@ -261,7 +262,6 @@ def board_the_plane(boardingQueue, family=False):
                         
                         # reset internal clock
                         seating_plan[3][NUM_ROWS - current_row][3] = 0
-               
                         
         total_time += TIME_STEP
                         
@@ -276,8 +276,7 @@ def board_the_plane(boardingQueue, family=False):
                 time_to_move = NON_FAMILY_TIME_TO_MOVE
                 boardingQueue.pop(0)
                 
-                
-            #Set first place in aisle to the first passenger in the seat data seating_plan[3] then remove it from seat data
+            #Set first place in isle to the first passenger in the seat data seating_plan[3] then remove it from seat data
             seating_plan[3][0] = boardingQueue[0]  
             boardingQueue.pop(0)
             
@@ -296,7 +295,7 @@ def board_the_plane(boardingQueue, family=False):
 
 # luggage
 def assign_luggage():
-    return random.choices([0,1,2], weights=BAG_COEFFICIENT, k=1)[0]
+    return random.choices([0,1,2], weights=(30,50,10), k=1)[0]
 
 # naughty boy
 def is_not_a_naughty_boy():
@@ -403,65 +402,17 @@ def create_boarding_order_for_aisle_but_with_groups(boarding_section, other_sect
     
     # window seats
     for row in range(1,NUM_ROWS+1):
-        
-        # check if item in group already appended
-        if (not any([row,column] in x for x in boarding_section) 
-            and not any([row,column] in x for x in other_section1)
-            and not any([row,column] in x for x in other_section2)):        
 
-            # if passenger is not useless
-            if is_not_a_naughty_boy():
-                
-                  
-                if column==-3:
-                    current_group_size = group_size((70,50,20))
-                    
-                    if current_group_size == 3:
-                        boarding_section.append([[row, -3],[row, -2],[row, -1]])
-                    elif current_group_size == 2:    
-                        boarding_section.append([[row, -3],[row, -2]])
-                    else:    
-                        boarding_section.append([[row, -3]])
-                        
-                elif column==3:
-                    current_group_size = group_size((70,50,20))
-                    
-                    if current_group_size == 3:
-                        boarding_section.append([[row, 3],[row, 2],[row, 1]])
-                    elif current_group_size == 2:    
-                        boarding_section.append([[row, 3],[row, 2]])
-                    else:    
-                        boarding_section.append([[row, 3]])            
-                        
-                
-                    
-                    
-                elif column==-2:
-                    current_group_size = group_size((80,40,0))
-                    if current_group_size == 2:    
-                        boarding_section.append([[row, -2],[row, -1]])
-                    else:    
-                        boarding_section.append([[row, -2]])   
-                elif column==2:
-                    current_group_size = group_size((80,40,0))
-                    if current_group_size == 2:    
-                        boarding_section.append([[row, 2],[row, 1]])
-                    else:    
-                        boarding_section.append([[row, 2]])               
-        
-                
-                else: boarding_section.append([[row, column]]) 
-                
-                
-                
-            # else they try board during different sections
+        # if passenger is not useless
+        if is_not_a_naughty_boy():
+            boarding_section.append([row, column, assign_luggage(), 0]) 
+        # else they try board during different sections
+        else:
+            if random.randrange(100) < 50:
+                other_section1.append([row, column, assign_luggage(), 0])  
             else:
-                if random.randrange(100) < 50:
-                    other_section1.append([[row, column]])  
-                else:
-                    other_section2.append([[row, column]])
+                other_section2.append([row, column, assign_luggage(), 0])
                 
-        
     
     
 
@@ -676,40 +627,88 @@ def seat_boarding_with_groups():
     test_cases = []
     for _ in range(N_TEST_CASES):
 
-        window,middle,aisle = [],[],[]
+        section1,section2,section3 = [],[],[]
 
         # window seats
-        create_boarding_order_for_aisle_but_with_groups(window,middle,aisle,-3)
-        create_boarding_order_for_aisle_but_with_groups(window,middle,aisle,3)
+        for row in range(1,NUM_ROWS+1):
+            
+            #group_size()=
+
+            # if passenger is not useless
+            if is_not_a_naughty_boy():
+                section1.append([row,-3]) 
+            # else they try board during different sections
+            else:
+                if random.randrange(100) < 50:
+                    section2.append([row,-3])  
+                else:
+                    section3.append([row,-3])  
+
+            # if passenger is not useless
+            if is_not_a_naughty_boy():
+                section1.append([row,3]) 
+            # else they try board during different sections
+            else:
+                if random.randrange(100) < 50:
+                    section2.append([row,3])  
+                else:
+                    section3.append([row,3])  
+
         # middle seats 
-        create_boarding_order_for_aisle_but_with_groups(middle,window,aisle,2)
-        create_boarding_order_for_aisle_but_with_groups(middle,window,aisle,-2) 
+        for row in range(1,NUM_ROWS+1):
+
+
+            # if passenger is not useless
+            if is_not_a_naughty_boy():
+                section2.append([row,-2]) 
+            # else they try board during different sections
+            else:
+                if random.randrange(100) < 50:
+                    section1.append([row,-2])  
+                else:
+                    section3.append([row,-2])  
+
+            if is_not_a_naughty_boy:
+                section2.append([row,2]) 
+            else:
+                if random.randrange(100) < 50:
+                    section1.append([row,2])  
+                else:
+                    section3.append([row,2])  
+
         # aisle seats
-        create_boarding_order_for_aisle_but_with_groups(aisle,window,middle,-1)
-        create_boarding_order_for_aisle_but_with_groups(aisle,window,middle,1)
+        for row in range(1,NUM_ROWS+1):
+
+            # if passenger is not useless
+            if is_not_a_naughty_boy():
+                section3.append([row,-1]) 
+            # else they try board during different sections
+            else:
+                if random.randrange(100) < 50:
+                    section1.append([row,-1])  
+                else:
+                    section2.append([row,-1])  
+
+
+            # if passenger is not useless
+            if is_not_a_naughty_boy:
+                section3.append([row,1]) 
+            # else they try board during different sections
+            else:
+                if random.randrange(100) < 50:
+                    section1.append([row,1])  
+                else:
+                    section2.append([row,1])   
+
 
         #print([i[1] for i in section1])
 
-        random.shuffle(window)
-        random.shuffle(middle)
-        random.shuffle(aisle)
-        
-        window = [j for sub in window for j in sub]
-        middle = [j for sub in middle for j in sub]
-        aisle = [j for sub in aisle for j in sub]
-        
-        boardingQueue = window+middle+aisle
-        
-        for passenger in boardingQueue:
-            passenger.append(assign_luggage())
-            passenger.append(0)
-        
-        #print(boardingQueue)
-        
-        test_cases.append(board_the_plane(boardingQueue))
+        random.shuffle(section1)
+        random.shuffle(section2)
+        random.shuffle(section3)
+        test_cases.append(board_the_plane(section1+section2+section3))
 
-    print('By seat with groups: ', sum(test_cases)/len(test_cases))    
-
+    print('By seat: ', sum(test_cases)/len(test_cases))        
     
     
     
@@ -879,9 +878,8 @@ def steffen_bofa_method():
 #random_boarding()
 #section_boarding()
 #seat_boarding()
-random_boarding_with_groups()
+#random_boarding_with_groups()
 section_boarding_with_groups()
-seat_boarding_with_groups()
 prioritize_groups_boarding()
-#steffen_deeznuts()
+steffen_deeznuts()
 steffen_bofa_method()
